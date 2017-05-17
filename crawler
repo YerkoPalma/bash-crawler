@@ -1,0 +1,106 @@
+#!/bin/bash
+
+version=0.1.0
+
+print_help () {
+  echo "Usage"
+  echo "  $ crawler [options] <site>"
+  echo ""
+  echo "Options"
+  echo "  --depth,  -d  Depth of the links searched   10"
+  echo "  --list,   -l  Print a list formatted output false"
+  echo ""
+  echo "Examples"
+  echo "  $ crawler -d 5 www.github.com"
+}
+
+parse_options () {
+  while [[ $# -gt 0 ]]; do
+    key="$1"
+    case $key in
+      -h|--help)
+        print_help
+      ;;
+      -v|--verbose)
+        verbose=true
+      ;;
+      -l|--list)
+        list=true
+      ;;
+      -d)
+        CRAWLER_DEPTH="$2"
+        shift # past argument
+      ;;
+      --depth=*)
+        CRAWLER_DEPTH="${1#*=}"
+      ;;
+      *)
+        if [ -n $1 ]; then
+          target=$1
+        else
+          print_help
+        fi
+      ;;
+    esac
+    shift # past argument or value
+  done
+}
+
+contains_element () {
+  local e
+  for e in "${@:2}"; do [[ "$e" == "$1" ]] && return 0; done
+  return 1
+}
+
+if [ $# -lt 1 ]; then
+ print_help
+ exit 1
+fi
+
+# parse valid options
+parse_options $@
+
+if $verbose; then
+  echo $CRAWLER_DEPTH
+fi
+
+# content = $target !== '' ? $(wget -qO - $target) || ''
+[[ -n $target ]] && content=$(wget -qO - $target) || content=''
+
+if [[ -z $content ]]; then
+  echo "The site $1 content could not be reached"
+  exit 1
+fi
+
+# get our first links
+keep_reading=1
+i=0
+
+# remove the head before procesing
+content=${content##*<body}
+
+while [[ $keep_reading -eq 1 ]]; do
+  if [[ $content == *href=* ]]; then
+    # 1. Remove everything before the first href
+    # _link=${link#*href=\"}
+    remove=${content#*href=[\"|\']}
+    # 2. get the first link
+    # echo ${_link%%\"\>*}
+    link=${remove%%[\"|\']*}
+    # remove repeated links
+    unique=$(contains_element $link "${links[@]}")
+    if [[ $unique -eq 0 ]]; then
+      links[$i]=$link
+      # echo "link -> ${remove%%\"\>*}"
+      (( i++ ))
+    fi
+    # echo $i
+    # 3. search in the rest of the string
+    # echo ${_link#*\"\>}
+    content=${remove#*[\"|\']\>}
+    # stop when there is no more 'href' in the given string
+  else
+    keep_reading=0
+  fi
+done
+printf '%s\n' "${links[@]}"
