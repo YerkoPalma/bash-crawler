@@ -1,0 +1,7 @@
+language: bash
+install:
+  - git clone https://github.com/sstephenson/bats.git
+  - cd bats
+  - sudo ./install.sh /usr/local
+script:
+  - bats --tap crawler.bats

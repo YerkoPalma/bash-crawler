@@ -46,6 +46,21 @@ parse_options () {
   done
 }
 
+filter_protocol () {
+  allowed_protocols=(http https / \#)
+  _links=$@
+  for protocol in "${allowed_protocols[@]}"; do
+    for i in "${!_links[@]}"; do
+      # if link start with allowed protocol, is fine
+      if [[ ${_links[i]} != "$protocol"* ]]; then
+        unset '_links[i]'
+      fi
+      # else, if link does not contain ':' is fine
+    done
+  done
+  # else link is not fine
+}
+
 if [ $# -lt 1 ]; then
  print_help
  exit 1
