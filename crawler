@@ -66,7 +66,6 @@ if [[ -z $content ]]; then
   exit 1
 fi
 
-# get our first links
 keep_reading=1
 i=0
 
@@ -76,19 +75,15 @@ content=${content##*<body}
 while [[ $keep_reading -eq 1 ]]; do
   if [[ $content == *href=* ]]; then
     # 1. Remove everything before the first href
-    # _link=${link#*href=\"}
     remove=${content#*href=[\"|\']}
     # 2. get the first link
-    # echo ${_link%%\"\>*}
     link=${remove%%[\"|\']*}
     links[$i]=$link
-    # echo "link -> ${remove%%\"\>*}"
     (( i++ ))
     # 3. search in the rest of the string
-    # echo ${_link#*\"\>}
     content=${remove#*[\"|\']\>}
-    # stop when there is no more 'href' in the given string
   else
+    # stop when there is no more 'href' in the given string
     keep_reading=0
   fi
 done
