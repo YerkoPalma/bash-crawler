@@ -46,12 +46,6 @@ parse_options () {
   done
 }
 
-contains_element () {
-  local e
-  for e in "${@:2}"; do [[ "$e" == "$1" ]] && return 0; done
-  return 1
-}
-
 if [ $# -lt 1 ]; then
  print_help
  exit 1
@@ -87,14 +81,9 @@ while [[ $keep_reading -eq 1 ]]; do
     # 2. get the first link
     # echo ${_link%%\"\>*}
     link=${remove%%[\"|\']*}
-    # remove repeated links
-    unique=$(contains_element $link "${links[@]}")
-    if [[ $unique -eq 0 ]]; then
-      links[$i]=$link
-      # echo "link -> ${remove%%\"\>*}"
-      (( i++ ))
-    fi
-    # echo $i
+    links[$i]=$link
+    # echo "link -> ${remove%%\"\>*}"
+    (( i++ ))
     # 3. search in the rest of the string
     # echo ${_link#*\"\>}
     content=${remove#*[\"|\']\>}
@@ -103,4 +92,5 @@ while [[ $keep_reading -eq 1 ]]; do
     keep_reading=0
   fi
 done
-printf '%s\n' "${links[@]}"
+unique_links=($(echo "${links[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
+printf '%s\n' "${unique_links[@]}"

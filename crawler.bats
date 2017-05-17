@@ -54,6 +54,10 @@
   run ./crawler -vl -d 2
 }
 
+@test "throw unknown option when option not recognized" {
+  skip
+}
+
 @test "depth default to 10 and list default to false" {
   skip
 }
