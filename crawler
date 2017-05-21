@@ -48,19 +48,38 @@ parse_options () {
 
 filter_protocol () {
   allowed_protocols=(http https / \#)
-  _links=$@
-  for protocol in "${allowed_protocols[@]}"; do
-    for i in "${!_links[@]}"; do
-      # if link start with allowed protocol, is fine
-      if [[ ${_links[i]} != "$protocol"* ]]; then
-        unset '_links[i]'
+  _links=("$@")
+  
+  for i in "${!_links[@]}"; do
+    # echo "link: ${_links[i]}"
+    # if link start with allowed protocol, is fine
+    shouldStop=0
+    for protocol in "${allowed_protocols[@]}"; do
+      if [[ ${_links[i]} == "$protocol"* ]]; then
+        shouldStop=1
+        break
       fi
-      # else, if link does not contain ':' is fine
     done
+    if [[ $shouldStop -eq 1 ]]; then
+      continue
+    fi
+      # return 0
+    # else, if link does not contain ':' is fine
+    if [[ ${_links[i]} != *:[^0-9]* ]]; then
+      # unset '_links[i]'
+      printf ""
+    else
+      # echo "link: ${_links[i]}"
+      unset '_links[i]'
+    fi
   done
-  # else link is not fine
+  return $_links
 }
 
+# ---------------------------------
+# filter_protocol "$@"
+# exit 0
+# ---------------------------------
 if [ $# -lt 1 ]; then
  print_help
  exit 1
@@ -103,4 +122,5 @@ while [[ $keep_reading -eq 1 ]]; do
   fi
 done
 unique_links=($(echo "${links[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
-printf '%s\n' "${unique_links[@]}"
+final_links=(filter_protocol "${unique_links[@]}")
+printf '%s\n' "${final_links[@]}"
