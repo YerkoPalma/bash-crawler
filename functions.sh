@@ -3,7 +3,7 @@ print_help () {
   echo "  $ crawler [options] <site>"
   echo ""
   echo "Options"
-  echo "  --depth,  -d  Depth of the links searched   10"
+  echo "  --depth,  -d  Depth of the links searched   5"
   echo "  --list,   -l  Print a list formatted output false"
   echo ""
   echo "Examples"
@@ -11,6 +11,8 @@ print_help () {
 }
 
 parse_options () {
+    # set defaults
+    CRAWLER_DEPTH=5
   while [[ $# -gt 0 ]]; do
     key="$1"
     case $key in
@@ -70,4 +72,13 @@ filter_protocol () {
     fi
   done
   return $_links
+}
+
+print_result () {
+  is_array=$(declare -p result 2> /dev/null | grep -q '^declare \-a' && echo 1 || echo 0)
+  # 1 is array
+  # 0 is not array
+  if [[ $is_array -eq 1 ]]; then
+    exit 1
+  fi
 }

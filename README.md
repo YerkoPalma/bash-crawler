@@ -16,7 +16,7 @@ $ crawler <site>
     $ crawler [options] <site>
 
   Options
-    --depth,    -d  Depth of the links searched   10
+    --depth,    -d  Depth of the links searched   5
     --help,     -h  Prints this helps             false
     --list,     -l  Print a list formatted output false
     --verbose,  -v  Verbose output                false

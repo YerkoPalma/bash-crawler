@@ -48,4 +48,16 @@ while [[ $keep_reading -eq 1 ]]; do
 done
 unique_links=($(echo "${links[@]}" | tr ' ' '\n' | sort -u | tr '\n' ' '))
 final_links=(filter_protocol "${unique_links[@]}")
-printf '%s\n' "${final_links[@]}"
+
+result[$target]=("${final_links[@]}")
+
+if [[ $CRAWLER_DEPTH -gt 0 ]]; then
+  (( CRAWLER_DEPTH-- ))
+  for flink in "${!final_links[@]}"; do
+    ./$0 -d $CRAWLER_DEPTH $flink
+  done
+else
+  export result
+  export CRAWLER_DEPTH
+  print_result
+fi
